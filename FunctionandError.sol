@@ -1,3 +1,4 @@
+//write a smart contract that implements the require(), assert() and revert() statements.
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
@@ -12,13 +13,15 @@ contract FunctionAndError {
     }
 
     function double() public {
-        require(x != 0, "Cannot double zero");
+        assert(x>0);
         x *= 2;
         isEven = true; 
     }
 
     function resetX() public {
-        require(x != 0, "x is already 0");
+        if (x == 0) {
+            revert("x is already 0");
+        }
         x = 0;
         isEven = false; 
     }
