@@ -1,28 +1,46 @@
-//write a smart contract that implements the require(), assert() and revert() statements.
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-contract FunctionAndError {
-    uint public x;
-    bool public isEven;
+contract Bank {
+    mapping(address => uint) public balances;
+    bool public isOperational;
 
-    function set(uint _x) public {
-        require(_x != x, "New value must be different from current value");
-        x = _x;
-        isEven = (_x % 2 == 0);
+    // Constructor to initialize the contract with the bank being non-operational
+    constructor() {
+        isOperational = false; // Bank starts as non-operational
     }
 
-    function double() public {
-        assert(x>0);
-        x *= 2;
-        isEven = true; 
+    function deposit() public payable {
+        require(isOperational, "Bank is not operational");
+        require(msg.value > 0, "Deposit amount must be greater than zero");
+
+        balances[msg.sender] += msg.value;
     }
 
-    function resetX() public {
-        if (x == 0) {
-            revert("x is already 0");
+    function withdraw(uint amount) public {
+        require(isOperational, "Bank is not operational");
+        require(amount <= balances[msg.sender], "Insufficient balance");
+
+        balances[msg.sender] -= amount;
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+    }
+
+    function doubleBalance() public {
+        assert(balances[msg.sender] > 0);
+        
+        balances[msg.sender] *= 2;
+    }
+
+    function resetBalance() public {
+        if (balances[msg.sender] == 0) {
+            revert("Balance is already zero");
         }
-        x = 0;
-        isEven = false; 
+
+        balances[msg.sender] = 0;
+    }
+
+    function toggleOperational() public {
+        isOperational = !isOperational;
     }
 }
